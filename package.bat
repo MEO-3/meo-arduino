@@ -1,6 +1,6 @@
 @echo off
-set "FOLDER_NAME=Meo3_Arduino"
-set "ZIP_NAME=Meo3_Arduino.zip"
+set "FOLDER_NAME=Meo_Arduino"
+set "ZIP_NAME=Meo_Arduino.zip"
 
 :: 1. Cleanup
 if exist "%ZIP_NAME%" del "%ZIP_NAME%"

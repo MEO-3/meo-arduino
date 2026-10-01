@@ -1,5 +1,5 @@
 #######################################
-# Syntax Highlighting for Meo3_Arduino
+# Syntax Highlighting for Meo_Arduino
 #######################################
 
 # Datatypes (Classes, Structs, Enums, Typedefs)

@@ -1,7 +1,7 @@
 # MEO 3 Arduino Library
 
 MEO 3 Arduino is an ESP32 firmware library for MEO 3 devices. It handles BLE provisioning against
-the MEO 3 open-service gateway so a device can join Wi-Fi and report what it can do, without the
+the MEO Edge gateway so a device can join Wi-Fi and report what it can do, without the
 sketch touching MQTT or BLE directly.
 
 ## What it does
@@ -57,7 +57,7 @@ Runtime command/reading exchange over MQTT (once the device is online) is not ye
 
 The device advertises the MEO provisioning service when Wi-Fi is missing. The full GATT contract
 (characteristics, payload formats, status states) is shared with the gateway and documented once,
-in `meo-3-open-service/docs/firmware_development_guide.md` — that file is the source of truth, not
+in `meo-edge/docs/firmware_development_guide.md` — that file is the source of truth, not
 this README.
 
 ## Capabilities
@@ -80,4 +80,4 @@ section for the full contract.
 ## Docs
 
 - `docs/key_concepts.md` — beginner mental model and full API reference
-- `meo-3-open-service/docs/firmware_development_guide.md` — authoritative BLE provisioning contract
+- `meo-edge/docs/firmware_development_guide.md` — authoritative BLE provisioning contract

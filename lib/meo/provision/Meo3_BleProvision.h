@@ -7,7 +7,7 @@
 #include "../storage/Meo3_Storage.h"
 #include "../ble/Meo3_Ble.h"
 
-// MEO open-service provisioning contract.
+// MEO Edge provisioning contract.
 #define MEO_BLE_PROV_SERV_UUID      "7f5a0000-0f23-4b6a-9f5e-3c2a9f7e0100"
 #define CH_UUID_DEVICE_MAC          "7f5a0001-0f23-4b6a-9f5e-3c2a9f7e0100"
 #define CH_UUID_WIFI_CONFIG         "7f5a0002-0f23-4b6a-9f5e-3c2a9f7e0100"

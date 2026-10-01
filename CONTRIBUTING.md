@@ -34,11 +34,11 @@ add one, wire it into `pio test`.
 ## Adding or changing a capability
 
 Capability IDs in `lib/meo/define/Meo3_Cmd.h` are a **cross-repo contract** with the gateway's
-`org.thingai.app.meo.define.MeoCmd` (in `meo-3-open-service`). The two catalogs must match
+`org.thingai.app.meo.define.MeoCmd` (in `meo-edge`). The two catalogs must match
 value-for-value — there's no shared build-time check, so:
 
 1. Add the constant to `Meo3_Cmd.h` here.
-2. Add the matching constant to `MeoCmd` in `meo-3-open-service`, same value.
+2. Add the matching constant to `MeoCmd` in `meo-edge`, same value.
 3. Commit both (separately — these are independent git repos).
 
 An ID the gateway doesn't recognize is displayed as "unknown" rather than dropped, so a
@@ -51,7 +51,7 @@ both sides agree.
 - `examples/` use 2-space indent and stick to the simple `MeoDevice` API surface — they're
   read by students, so avoid introducing advanced/internal APIs there.
 - The BLE provisioning GATT contract (UUIDs, payload formats, status states) is documented once,
-  in `meo-3-open-service/docs/firmware_development_guide.md`. Don't duplicate it in this repo's
+  in `meo-edge/docs/firmware_development_guide.md`. Don't duplicate it in this repo's
   README or docs — link to it instead, so the two don't drift apart.
 - Commits: small and scoped; Conventional Commits style (`feat:`, `fix:`, `refactor:`, `docs:`)
   matches existing history.

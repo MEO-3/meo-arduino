@@ -6,7 +6,7 @@
 
 /**
  * MeoMessaging: runtime MQTT messaging per
- * meo-3-open-service/docs/mqtt_messaging.md.
+ * meo-edge/docs/mqtt_messaging.md.
  * - Owns the device topic namespace (command/reply/event)
  * - Parses/builds the fixed-size little-endian binary frames (no JSON)
  * - Dispatches incoming commands to registered capability handlers

@@ -1,8 +1,8 @@
 # Key Concepts
 
-This library follows the MEO 3 open-service contract: it gets an ESP32 device provisioned over
+This library follows the MEO Edge contract: it gets an ESP32 device provisioned over
 BLE, then online over MQTT — receiving commands, replying, and publishing readings/events per
-`meo-3-open-service/docs/mqtt_messaging.md`.
+`meo-edge/docs/mqtt_messaging.md`.
 
 ## Device lifecycle
 
@@ -60,7 +60,7 @@ BLE, then online over MQTT — receiving commands, replying, and publishing read
 When Wi-Fi is missing, the device advertises the MEO provisioning BLE service and walks the
 gateway through MAC → capabilities → Wi-Fi config → status notify. The exact GATT contract
 (UUIDs, payload formats, status states) is documented once, shared with the gateway, in
-`meo-3-open-service/docs/firmware_development_guide.md` — treat that file as the source of truth
+`meo-edge/docs/firmware_development_guide.md` — treat that file as the source of truth
 rather than this one.
 
 ## Capabilities
@@ -77,7 +77,7 @@ payload shape.
 Once Wi-Fi is up, `MeoDevice` connects to the gateway broker (host/port stored during BLE
 provisioning, keys `mq_host`/`mq_port`), subscribes to its command topic, dispatches commands to
 the registered handlers, and auto-publishes a reply for every command. Topic and payload shapes
-are documented once, shared with the gateway, in `meo-3-open-service/docs/mqtt_messaging.md` —
+are documented once, shared with the gateway, in `meo-edge/docs/mqtt_messaging.md` —
 treat that file as the source of truth. Reconnects retry every 5 s; replies and events are QoS 0
 (PubSubClient publish limitation, acknowledged in the contract doc).
 
