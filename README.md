@@ -1,8 +1,6 @@
 # MEO 3 Arduino Library
 
-MEO 3 Arduino is an ESP32 firmware library for MEO 3 devices. It handles BLE provisioning against
-the MEO Edge gateway so a device can join Wi-Fi and report what it can do, without the
-sketch touching MQTT or BLE directly.
+MEO 3 Arduino is an ESP32 firmware library for MEO 3 devices. It handles BLE provisioning against the MEO Edge gateway so a device can join Wi-Fi and report what it can do, without the sketch touching MQTT or BLE directly.
 
 ## What it does
 
@@ -56,16 +54,11 @@ See `docs/key_concepts.md` for handler rules and the wire format.
 
 ## Provisioning
 
-The device advertises the MEO provisioning service when Wi-Fi is missing. The full GATT contract
-(characteristics, payload formats, status states) is shared with the gateway and documented once,
-in `meo-edge/docs/firmware_development_guide.md` — that file is the source of truth, not
-this README.
+The device advertises the MEO provisioning service when Wi-Fi is missing. The full GATT contract (characteristics, payload formats, status states) is shared with the gateway and documented once, in `meo-edge/docs/firmware_development_guide.md` — that file is the source of truth, not this README.
 
 ## Capabilities
 
-A device defines its own caps by key (`[a-z0-9_]{1,32}`, max 16) and reports them during
-provisioning; there is no shared catalog. Every cap can be read, written and sent as an event, with
-`int16` values (decimals x100). Changing the cap list requires re-provisioning.
+A device defines its own caps by key (`[a-z0-9_]{1,32}`, max 16) and reports them during provisioning; there is no shared catalog. Every cap can be read, written and sent as an event, with `int16` values (decimals x100). Changing the cap list requires re-provisioning.
 
 ## Examples
 

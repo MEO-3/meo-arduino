@@ -1,8 +1,6 @@
 # Contributing
 
-This is the ESP32 firmware library that runs on MEO 3 devices. It's one of four independent repos
-in the MEO 3 workspace (Java gateway, this Arduino library, Node-RED nodes, Node-RED fork) — see
-the workspace-level `AGENTS.md` for how they fit together.
+This is the ESP32 firmware library that runs on MEO 3 devices. It's one of four independent repos in the MEO 3 workspace (Java gateway, this Arduino library, Node-RED nodes, Node-RED fork) — see the workspace-level `AGENTS.md` for how they fit together.
 
 ## Repo layout
 
@@ -27,22 +25,16 @@ pio run -e devkit-test -t upload   # flash
 pio device monitor -b 115200              # serial monitor
 ```
 
-There's no test suite checked in yet (`test/` is the PlatformIO Unit Testing placeholder). If you
-add one, wire it into `pio test`.
+There's no test suite checked in yet (`test/` is the PlatformIO Unit Testing placeholder). If you add one, wire it into `pio test`.
 
 ## Wire contract
 
-`msg/` mirrors the gateway's `MeoMsgFrame.java` and `MeoMsgErr.java` (in `meo-edge`). There's no
-shared build-time check, so change both sides together (separate commits — independent repos).
+`msg/` mirrors the gateway's `MeoMsgFrame.java` and `MeoMsgErr.java` (in `meo-edge`). There's no shared build-time check, so change both sides together (separate commits — independent repos).
 
 ## Conventions
 
 - `lib/meo/` uses 4-space indent, matches the rest of the codebase.
-- `examples/` use 2-space indent and stick to the simple `MeoDevice` API surface — they're
-  read by students, so avoid introducing advanced/internal APIs there.
-- The BLE provisioning GATT contract (UUIDs, payload formats, status states) is documented once,
-  in `meo-edge/docs/firmware_development_guide.md`. Don't duplicate it in this repo's
-  README or docs — link to it instead, so the two don't drift apart.
-- Commits: small and scoped; Conventional Commits style (`feat:`, `fix:`, `refactor:`, `docs:`)
-  matches existing history.
+- `examples/` use 2-space indent and stick to the simple `MeoDevice` API surface — they're read by students, so avoid introducing advanced/internal APIs there.
+- The BLE provisioning GATT contract (UUIDs, payload formats, status states) is documented once, in `meo-edge/docs/firmware_development_guide.md`. Don't duplicate it in this repo's README or docs — link to it instead, so the two don't drift apart.
+- Commits: small and scoped; Conventional Commits style (`feat:`, `fix:`, `refactor:`, `docs:`) matches existing history.
 - Don't commit Wi-Fi credentials, device keys, or other runtime config.
