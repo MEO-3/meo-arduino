@@ -1,12 +1,12 @@
 // Control the built-in LED from the gateway.
 //
-// Declares MEO_WRITE_LED and drives LED_BUILTIN with it. The gateway sends the
-// command over MQTT and waits for this device's reply:
+// Declares the "led" cap and drives LED_BUILTIN with it. The gateway sends the
+// write over MQTT and waits for this device's reply:
 //
 //   curl -X POST http://<gateway>:7070/api/v1/devices/<deviceId>/command \
-//        -H 'Content-Type: application/json' -d '{"cap":65281,"value":1}'
+//        -H 'Content-Type: application/json' -d '{"cap":"led","op":"write","value":1}'
 //
-// cap 65281 is 0xFF01 (MEO_WRITE_LED); value 0 turns the LED off, non-zero on.
+// value 0 turns the LED off, non-zero on. "op":"read" returns the last value.
 // deviceId is the device's Wi-Fi MAC, lowercase hex without separators.
 //
 // On first boot the device is unprovisioned and advertises over BLE; provision
@@ -15,15 +15,14 @@
 
 #include <Arduino.h>
 #include <Meo3.h>
-#include "define/Meo3_Cmd.h"
 
 #define LED_BUILTIN 8
 
 MeoDevice meo("MEO LED Demo");
 
-// MEO_WRITE_LED handler. Returning false replies MEO_ERR_HANDLE_FAILED to the
+// "led" write handler. Returning false replies MEO_ERR_HANDLE_FAILED to the
 // gateway; here the write always succeeds.
-static bool handleLed(int32_t value) {
+static bool handleLed(int16_t value) {
     digitalWrite(LED_BUILTIN, value ? LOW : HIGH);
     Serial.printf("[LED] %s\n", value ? "on" : "off");
     return true;
@@ -38,10 +37,9 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
 
 
-    // Registering the handler also declares the capability, which is what the
-    // gateway reads off the BLE capability characteristic while provisioning.
-    // Must happen before begin().
-    meo.onCommand(MEO_WRITE_LED, handleLed);
+    // Declare the cap before begin(): the gateway reads the cap list off the
+    // BLE capability characteristic while provisioning.
+    meo.addCap("led", handleLed);
 
     // Development shortcut — bypasses BLE provisioning:
     // meo.beginWifi("your-ssid", "your-password");

@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Meo3.h>
-#include "define/Meo3_Cmd.h"
 
 // ESP32-C3-DevKitC-02 built-in RGB is GPIO8; adjust if your board differs
 #define LED_PIN 8
@@ -21,15 +20,15 @@ static void blinkLed(int times, int periodMs) {
     }
 }
 
-// MEO_WRITE_LED handler: 0 = off, anything else = on
-static bool handleLed(int32_t value) {
+// "led" write handler: 0 = off, anything else = on
+static bool handleLed(int16_t value) {
     digitalWrite(LED_PIN, value ? HIGH : LOW);
     return true;
 }
 
-// MEO_READ_TEMP handler: no real sensor on the devkit — fake a slow drift
-static double readTemperature() {
-    return 20.0 + (millis() % 10000) / 1000.0;
+// "temp" read handler, °C x100: no real sensor on the devkit — fake a slow drift
+static int16_t readTemperature() {
+    return 2000 + (millis() % 10000) / 10;
 }
 
 void setup() {
@@ -42,11 +41,10 @@ void setup() {
     Serial.println("\n=== MEO Provisioning + Messaging Test ===");
 
 
-    // Handlers registered before begin() double as capability declarations —
-    // the gateway reads the declared set off the BLE capability characteristic
-    // during provisioning, and commands for these caps are dispatched here.
-    meo.onCommand(MEO_WRITE_LED, handleLed);
-    meo.onRead(MEO_READ_TEMP, readTemperature);
+    // Caps declared before begin() — the gateway reads them off the BLE
+    // capability characteristic during provisioning. idx = declaration order.
+    meo.addCap("led", handleLed);
+    meo.addCap("temp", nullptr, readTemperature);
 
     bool ok = meo.begin();
     if (!ok) {
@@ -75,7 +73,7 @@ void loop() {
     }
 
     // First time we reach provisioned state; from here the LED belongs to
-    // MEO_WRITE_LED commands
+    // "led" writes
     static bool announced = false;
     if (!announced) {
         announced = true;
@@ -87,6 +85,6 @@ void loop() {
     static uint32_t lastReadingAt = 0;
     if (meo.isMqttConnected() && millis() - lastReadingAt >= READING_INTERVAL_MS) {
         lastReadingAt = millis();
-        meo.sendReading(MEO_READ_TEMP, readTemperature());
+        meo.sendEvent("temp", readTemperature());
     }
 }

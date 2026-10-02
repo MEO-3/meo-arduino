@@ -10,11 +10,10 @@ the workspace-level `AGENTS.md` for how they fit together.
   - `Meo3_Device.{h,cpp}` — `MeoDevice`, the main entry point (lifecycle, capability declaration)
   - `ble/` — thin NimBLE wrapper (`MeoBle`)
   - `provision/` — BLE provisioning GATT service and state machine (`MeoBleProvision`)
-  - `mqtt/` — standalone MQTT transport wrapper (`MeoMqttClient`); not yet wired into `MeoDevice`
+  - `mqtt/` — MQTT transport wrapper (`MeoMqttClient`)
+  - `msg/` — cap table, 4-byte device frame and error codes (`MeoMsg`, `Meo3_MsgErr.h`)
   - `storage/` — persisted Wi-Fi credentials (`MeoStorage`)
-  - `define/Meo3_Cmd.h` — the shared capability/command catalog (see below)
-- `src/main.cpp` — a manual smoke-test sketch for the provisioning flow (excluded from the
-  published library via `library.json`'s `export.exclude`)
+- `src/<project>/main.cpp` — dev sketches (`devkit-test`, `thingcube`), one PlatformIO env each
 - `examples/` — sketches shipped with the library for end users
 - `docs/key_concepts.md` — user-facing mental model and API reference
 
@@ -23,27 +22,18 @@ the workspace-level `AGENTS.md` for how they fit together.
 PlatformIO, targeting `esp32-c3-devkitc-02` (see `platformio.ini`):
 
 ```bash
-pio run -e esp32-c3-devkitc-02            # build
-pio run -e esp32-c3-devkitc-02 -t upload  # flash
+pio run -e devkit-test             # build
+pio run -e devkit-test -t upload   # flash
 pio device monitor -b 115200              # serial monitor
 ```
 
 There's no test suite checked in yet (`test/` is the PlatformIO Unit Testing placeholder). If you
 add one, wire it into `pio test`.
 
-## Adding or changing a capability
+## Wire contract
 
-Capability IDs in `lib/meo/define/Meo3_Cmd.h` are a **cross-repo contract** with the gateway's
-`org.thingai.app.meo.define.MeoCmd` (in `meo-edge`). The two catalogs must match
-value-for-value — there's no shared build-time check, so:
-
-1. Add the constant to `Meo3_Cmd.h` here.
-2. Add the matching constant to `MeoCmd` in `meo-edge`, same value.
-3. Commit both (separately — these are independent git repos).
-
-An ID the gateway doesn't recognize is displayed as "unknown" rather than dropped, so a
-one-sided change won't break anything immediately — but it also won't do anything useful until
-both sides agree.
+`msg/` mirrors the gateway's `MeoMsgFrame.java` and `MeoMsgErr.java` (in `meo-edge`). There's no
+shared build-time check, so change both sides together (separate commits — independent repos).
 
 ## Conventions
 

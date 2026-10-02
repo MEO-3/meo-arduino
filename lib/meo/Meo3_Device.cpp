@@ -26,30 +26,24 @@ void MeoDevice::setFirmwareVersion(const char* version) {
     if (version && version[0]) _fwVersion = version;
 }
 
-void MeoDevice::addCapability(uint16_t capabilityId) {
-    if (_capabilityCount >= MEO_MAX_CAPABILITIES) {
-        logw("DEVICE", "Capability list full; ignoring 0x%04X", capabilityId);
-        return;
-    }
-    for (uint8_t i = 0; i < _capabilityCount; ++i) {
-        if (_capabilities[i] == capabilityId) return;  // already declared
-    }
-    _capabilities[_capabilityCount++] = capabilityId;
+int MeoDevice::addCap(const char* key, MeoMsg::MeoWriteHandler onWrite,
+                      MeoMsg::MeoReadHandler onRead) {
+    return _msg.addCap(key, onWrite, onRead);
 }
 
 size_t MeoDevice::buildCapabilityPayload(char* out, size_t cap) const {
     if (!out || cap == 0) return 0;
 
     int n = snprintf(out, cap,
-                     "{\"model\":\"%s\",\"fw\":\"%s\",\"capabilities\":[",
+                     "{\"model\":\"%s\",\"fw\":\"%s\",\"caps\":[",
                      _model ? _model : "",
                      _fwVersion ? _fwVersion : "");
     if (n < 0 || (size_t)n >= cap) return 0;
     size_t len = (size_t)n;
 
-    for (uint8_t i = 0; i < _capabilityCount; ++i) {
-        int m = snprintf(out + len, cap - len, "%s%u",
-                         i == 0 ? "" : ",", _capabilities[i]);
+    for (uint8_t i = 0; i < _msg.capCount(); ++i) {
+        int m = snprintf(out + len, cap - len, "%s\"%s\"",
+                         i == 0 ? "" : ",", _msg.capKey(i));
         if (m < 0 || len + (size_t)m >= cap) return 0;
         len += (size_t)m;
     }
@@ -59,24 +53,8 @@ size_t MeoDevice::buildCapabilityPayload(char* out, size_t cap) const {
     return len + (size_t)t;
 }
 
-bool MeoDevice::onCommand(uint16_t cap, MeoMessaging::MeoWriteHandler fn) {
-    // MEO_CMD_* generic commands (below 0x1000) are implicit — every firmware
-    // supports them, they are never declared during provisioning.
-    if (cap >= 0x1000) addCapability(cap);
-    return _messaging.onCommand(cap, fn);
-}
-
-bool MeoDevice::onRead(uint16_t cap, MeoMessaging::MeoReadHandler fn) {
-    if (cap >= 0x1000) addCapability(cap);
-    return _messaging.onRead(cap, fn);
-}
-
-bool MeoDevice::sendReading(uint16_t cap, double value) {
-    return _messaging.sendEvent(cap, value);
-}
-
-bool MeoDevice::sendEvent(uint16_t cap, double value) {
-    return _messaging.sendEvent(cap, value);
+bool MeoDevice::sendEvent(const char* key, int16_t value) {
+    return _msg.sendEvent(key, value);
 }
 
 void MeoDevice::setBroker(const char* host, uint16_t port) {
@@ -115,8 +93,13 @@ bool MeoDevice::begin() {
         return false;
     }
 
-    char capPayload[384];
-    if (buildCapabilityPayload(capPayload, sizeof(capPayload)) == 0) capPayload[0] = '\0';
+    // 512 B is the BLE attribute max; an oversized report is served empty, so the
+    // gateway provisions the device with no caps.
+    char capPayload[513];
+    if (buildCapabilityPayload(capPayload, sizeof(capPayload)) == 0) {
+        loge("DEVICE", "Cap report over 512 B; shorten cap keys");
+        capPayload[0] = '\0';
+    }
     _prov.setCapabilities(capPayload);
 
     if (!_prov.begin(&_ble, &_storage, _model)) {
@@ -160,11 +143,11 @@ void MeoDevice::loop() {
     }
 
     // Once online, start MQTT messaging (one attempt) and keep driving it
-    if (_wifiReady && !_messagingStarted) {
-        _startMessaging();
+    if (_wifiReady && !_msgStarted) {
+        _startMsg();
     }
-    if (_messagingActive) {
-        _messaging.loop();
+    if (_msgActive) {
+        _msg.loop();
     }
 }
 
@@ -172,8 +155,8 @@ void MeoDevice::loop() {
 // setBroker() override (development) or storage, written during BLE
 // provisioning. Missing broker info leaves messaging off — the device still
 // runs, so a re-provision can fix it.
-void MeoDevice::_startMessaging() {
-    _messagingStarted = true;
+void MeoDevice::_startMsg() {
+    _msgStarted = true;
 
     const char* host = _brokerHostOverride;
     uint16_t port = _brokerPortOverride;
@@ -188,12 +171,12 @@ void MeoDevice::_startMessaging() {
     }
     _mqtt.configure(host, port);
     _mqtt.setCredentials(_deviceId.c_str(), nullptr); // MAC as MQTT client id; no auth yet
-    if (!_messaging.begin(&_mqtt, _deviceId.c_str())) {
+    if (!_msg.begin(&_mqtt, _deviceId.c_str())) {
         loge("DEVICE", "Messaging init failed");
         return;
     }
 
-    _messagingActive = true;
+    _msgActive = true;
     logi("DEVICE", "Messaging starting (broker %s:%u)", host, (unsigned)port);
 }
 
@@ -230,8 +213,7 @@ void MeoDevice::_ensureMacIdentity() {
     if (esp_read_mac(mac, ESP_MAC_WIFI_STA) != ESP_OK) {
         esp_read_mac(mac, ESP_MAC_ETH);
     }
-    // Lowercase hex, no separators — directly usable in MQTT topics
-    // (mqtt_messaging.md "Identities")
+    // Lowercase hex, no separators — used as the device id in MQTT topics
     char buf[13];
     snprintf(buf, sizeof(buf), "%02x%02x%02x%02x%02x%02x",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);

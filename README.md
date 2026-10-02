@@ -21,15 +21,17 @@ sketch touching MQTT or BLE directly.
 
 ```cpp
 #include <Meo3.h>
-#include "define/Meo3_Cmd.h"
 
 MeoDevice meo("Classroom Weather Station");
 
+int16_t readTemp() { return 2345; }            // 23.45 °C, values are x100
+bool setMotor(int16_t speed) { /* ... */ return true; }
+
 void setup() {
-  // Declare capabilities before begin() — the gateway reads them off the
-  // BLE capability characteristic during provisioning.
-  meo.addCapability(MEO_READ_TEMP);
-  meo.addCapability(MEO_WRITE_MOTOR);
+  // Declare caps before begin() — the gateway reads them off the BLE
+  // capability characteristic during provisioning.
+  meo.addCap("temp", nullptr, readTemp);
+  meo.addCap("motor", setMotor);
 
   meo.begin();
 }
@@ -42,16 +44,15 @@ void loop() {
 ## API
 
 - `MeoDevice()` / `MeoDevice(model)`
-- `setLogger(fn)`, `setDebugTags(csv)` — optional logging
 - `setDeviceInfo(model, manufacturer)`, `setFirmwareVersion(version)`
-- `addCapability(id)` — declare a capability from `lib/meo/define/Meo3_Cmd.h`; call before `begin()`
+- `addCap(key, onWrite, onRead)` — declare a cap by key; call before `begin()`
+- `sendEvent(key, value)` — push a cap's value (reading or event) to the gateway
 - `beginWifi(ssid, pass)` — bypass BLE provisioning for local development
 - `begin()` — init storage/BLE/provisioning, connect if already provisioned
 - `loop()` — drive provisioning, detect Wi-Fi connect, stop BLE once online
-- `isProvisioned()`, `isWifiConnected()`
+- `isProvisioned()`, `isWifiConnected()`, `isMqttConnected()`
 
-Runtime command/reading exchange over MQTT (once the device is online) is not yet wired into
-`MeoDevice` — see `docs/key_concepts.md`.
+See `docs/key_concepts.md` for handler rules and the wire format.
 
 ## Provisioning
 
@@ -62,20 +63,15 @@ this README.
 
 ## Capabilities
 
-A device doesn't register a per-product profile. It reports the generic capability IDs it supports
-(from `lib/meo/define/Meo3_Cmd.h`) during provisioning; the gateway's `MeoCmd` catalog is kept in
-sync with this file value-for-value. See the firmware development guide's "Capability Reporting"
-section for the full contract.
+A device defines its own caps by key (`[a-z0-9_]{1,32}`, max 16) and reports them during
+provisioning; there is no shared catalog. Every cap can be read, written and sent as an event, with
+`int16` values (decimals x100). Changing the cap list requires re-provisioning.
 
 ## Examples
 
 - `examples/01_blink_command`
 - `examples/02_button_event`
 - `examples/03_temperature_reading`
-
-> These examples predate the capability-based API above and still call `onCommand` /
-> `sendReading` / `sendEvent`, which no longer exist on `MeoDevice`. `src/main.cpp` is the sketch
-> that matches the current library; the examples are due for an update to match.
 
 ## Docs
 

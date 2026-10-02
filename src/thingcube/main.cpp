@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <Meo3.h>
 #include <Wire.h>
-#include "define/Meo3_Cmd.h"
 #include "peripherals/dht.h"
 #include "peripherals/mpu.h"
 #include "peripherals/oled.h"
@@ -10,14 +9,13 @@
 
 MeoDevice meo;
 
-// Read handlers for the gateway's MEO_READ_* commands; the reply carries the
-// return value. Registering them also declares the capability.
-static double readTemp() {
-    return dhtTemperature();
+// Read handlers for the gateway's reads; values are x100 (23.45 °C -> 2345).
+static int16_t readTemp() {
+    return (int16_t)lroundf(dhtTemperature() * 100);
 }
 
-static double readHumid() {
-    return dhtHumidity();
+static int16_t readHumid() {
+    return (int16_t)lroundf(dhtHumidity() * 100);
 }
 
 void setup() {
@@ -29,8 +27,8 @@ void setup() {
 
     // Must happen before begin(): the BLE capability characteristic is built
     // from the declared set.
-    meo.onRead(MEO_READ_TEMP, readTemp);
-    meo.onRead(MEO_READ_HUMID, readHumid);
+    meo.addCap("temp", nullptr, readTemp);
+    meo.addCap("humid", nullptr, readHumid);
 
     // One shared bus for the MPU6050 and the OLED.
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -87,10 +85,10 @@ void loop() {
     // quantises to 1C / 1%RH, so a steady sensor yields identical bits. A push
     // that fails while offline leaves the marker alone, so it retries next tick.
     static float pushedT = NAN, pushedH = NAN;
-    if (t != pushedT && meo.sendReading(MEO_READ_TEMP, t)) {
+    if (t != pushedT && meo.sendEvent("temp", (int16_t)lroundf(t * 100))) {
         pushedT = t;
     }
-    if (h != pushedH && meo.sendReading(MEO_READ_HUMID, h)) {
+    if (h != pushedH && meo.sendEvent("humid", (int16_t)lroundf(h * 100))) {
         pushedH = h;
     }
 
