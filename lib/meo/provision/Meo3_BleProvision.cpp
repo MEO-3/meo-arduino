@@ -34,7 +34,7 @@ bool MeoBleProvision::_createServiceAndCharacteristics() {
     if (!_svc) return false;
 
     _chMac = _ble->createCharacteristic(_svc, CH_UUID_DEVICE_MAC, NIMBLE_PROPERTY::READ);
-    _chWifiConfig = _ble->createCharacteristic(_svc, CH_UUID_WIFI_CONFIG, NIMBLE_PROPERTY::WRITE);
+    _chWifiConfig = _ble->createCharacteristic(_svc, CH_UUID_NETWORK_CONFIG, NIMBLE_PROPERTY::WRITE);
     _chStatus = _ble->createCharacteristic(_svc, CH_UUID_PROVISION_STATUS, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
     _chCapabilities = _ble->createCharacteristic(_svc, CH_UUID_DEVICE_CAPABILITIES, NIMBLE_PROPERTY::READ);
 
@@ -127,7 +127,7 @@ void MeoBleProvision::_onWriteStatic(NimBLECharacteristic* ch, void* ctx) {
 }
 
 void MeoBleProvision::_onWrite(NimBLECharacteristic* ch) {
-    if (!ch || !ch->getUUID().equals(NimBLEUUID(CH_UUID_WIFI_CONFIG))) return;
+    if (!ch || !ch->getUUID().equals(NimBLEUUID(CH_UUID_NETWORK_CONFIG))) return;
 
     std::string payload = ch->getValue();
     StaticJsonDocument<384> doc;

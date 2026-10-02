@@ -7,7 +7,7 @@
 #include "../Meo3_Logger.h"
 
 /**
- * MeoMqtt: minimal MQTT transport wrapper around PubSubClient.
+ * MeoMqttClient: minimal MQTT transport wrapper around PubSubClient.
  * - Keeps RAM/flash low
  * - Clean separation from device/feature logic
  * - Delivers raw messages via a lightweight function pointer callback

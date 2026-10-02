@@ -2,7 +2,7 @@
 #include "Meo3_MsgErr.h"
 #include <string.h>
 
-// Frame: mirror of the gateway's MeoMsgFrame.java.
+// Frame: mirror of the edge's MeoMsgEdgeFrame.java.
 static const unsigned int FRAME_SIZE = 4;
 static const uint8_t TYPE_READ  = 0;
 static const uint8_t TYPE_WRITE = 1;
@@ -11,7 +11,7 @@ static const uint8_t TYPE_ERR   = 3;
 static const uint8_t TYPE_EVENT = 4;
 static const uint8_t SEQ_MASK   = 0x1F;
 
-// Same rule as the gateway's provisioning check: [a-z0-9_]{1,32}.
+// Same rule as the edge's provisioning check: [a-z0-9_]{1,32}.
 static bool validKey(const char* key) {
     if (!key) return false;
     size_t n = strlen(key);
