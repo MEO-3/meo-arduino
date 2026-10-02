@@ -1,6 +1,6 @@
 #pragma once
 
-// SH1106 128x64 OLED on the shared I2C bus. Wire.begin() must run first.
+// SSD1306 0.96" 128x64 OLED on the shared I2C bus. Wire.begin() must run first.
 
 bool oledBegin();
 

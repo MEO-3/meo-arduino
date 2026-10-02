@@ -1,4 +1,4 @@
-// ThingCube — DHT11 + MPU6050 + SH1106 on a MEO device.
+// ThingCube — DHT11 + MPU6050 + SSD1306 on a MEO device.
 #include <Arduino.h>
 #include <Meo3.h>
 #include <Wire.h>
@@ -37,7 +37,7 @@ void setup() {
         logw("CUBE", "MPU6050 not found - check wiring/address");
     }
     if (!oledBegin()) {
-        logw("CUBE", "SH1106 not found - check wiring/address");
+        logw("CUBE", "SSD1306 not found - check wiring/address");
     }
     oledText("ThingCube", "starting...");
 
