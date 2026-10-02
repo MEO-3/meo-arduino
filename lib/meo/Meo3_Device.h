@@ -17,8 +17,8 @@ public:
     MeoDevice(const char* model);
     // CSV of tags to enable DEBUG logs for (e.g. "DEVICE,PROV")
 
-    // Device model and manufacturer. The model is reported to the gateway in
-    // the capability report; the human-facing device name lives on the gateway,
+    // Device model and manufacturer. The model is reported to the edge in
+    // the capability report; the human-facing device name lives on the edge,
     // not on firmware.
     void setDeviceInfo(const char* model, const char* manufacturer);
 

@@ -1,6 +1,6 @@
-// Send a "button" event to the gateway on every press.
+// Send a "button" event to the edge on every press.
 //
-// "button" has no handlers: the gateway can read its last value (1 after the
+// "button" has no handlers: the edge can read its last value (1 after the
 // first press, 0 before), and a write is rejected as not supported.
 
 #include <Meo3.h>

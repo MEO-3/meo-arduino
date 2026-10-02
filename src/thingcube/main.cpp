@@ -9,7 +9,7 @@
 
 MeoDevice meo;
 
-// Read handlers for the gateway's reads; values are x100 (23.45 °C -> 2345).
+// Read handlers for the edge's reads; values are x100 (23.45 °C -> 2345).
 static int16_t readTemp() {
     return (int16_t)lroundf(dhtTemperature() * 100);
 }
@@ -61,7 +61,7 @@ void loop() {
     }
     last = millis();
 
-    // Sensors stay idle until the gateway has provisioned the device.
+    // Sensors stay idle until the edge has provisioned the device.
     if (!meo.isProvisioned()) {
         oledText("ThingCube", "Not provisioned", "BLE pairing...");
         return;

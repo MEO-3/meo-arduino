@@ -41,7 +41,7 @@ void setup() {
     Serial.println("\n=== MEO Provisioning + Messaging Test ===");
 
 
-    // Caps declared before begin() — the gateway reads them off the BLE
+    // Caps declared before begin() — the edge reads them off the BLE
     // capability characteristic during provisioning. idx = declaration order.
     meo.addCap("led", handleLed);
     meo.addCap("temp", nullptr, readTemperature);
@@ -59,7 +59,7 @@ void setup() {
         Serial.printf("[INFO] Already provisioned. IP: %s\n", WiFi.localIP().toString().c_str());
         blinkLed(2, 300);
     } else {
-        Serial.println("[INFO] Not provisioned — BLE advertising. Waiting for gateway...");
+        Serial.println("[INFO] Not provisioned — BLE advertising. Waiting for edge...");
     }
 }
 

@@ -1,6 +1,6 @@
 # Contributing
 
-This is the ESP32 firmware library that runs on MEO 3 devices. It's one of four independent repos in the MEO 3 workspace (Java gateway, this Arduino library, Node-RED nodes, Node-RED fork) — see the workspace-level `AGENTS.md` for how they fit together.
+This is the ESP32 firmware library that runs on MEO 3 devices. It's one of five independent repos in the MEO 3 workspace (`meo-edge` edge service, `meo-cloud`, this library, `meo-dist` packaging, `node-red-meo` Node-RED fork) — see the workspace-level `AGENTS.md` for how they fit together.
 
 ## Repo layout
 
@@ -20,16 +20,16 @@ This is the ESP32 firmware library that runs on MEO 3 devices. It's one of four 
 PlatformIO, targeting `esp32-c3-devkitc-02` (see `platformio.ini`):
 
 ```bash
-pio run -e devkit-test             # build
-pio run -e devkit-test -t upload   # flash
-pio device monitor -b 115200              # serial monitor
+pio run -e devkit-test            # build
+pio run -e devkit-test -t upload  # flash
+pio device monitor -b 115200      # serial monitor
 ```
 
 There's no test suite checked in yet (`test/` is the PlatformIO Unit Testing placeholder). If you add one, wire it into `pio test`.
 
 ## Wire contract
 
-`msg/` mirrors the gateway's `MeoMsgFrame.java` and `MeoMsgErr.java` (in `meo-edge`). There's no shared build-time check, so change both sides together (separate commits — independent repos).
+`msg/` mirrors the edge's `MeoMsgEdgeFrame.java`, the device topics in `MeoTopic.java`, and the device codes (1–99) in `MeoErr.java` (in `meo-edge`). `provision/` UUIDs mirror `ProvisionBleUuid.java`. There's no shared build-time check, so change both sides together (separate commits — independent repos).
 
 ## Conventions
 

@@ -24,7 +24,7 @@ This library follows the MEO Edge contract: it gets an ESP32 device provisioned 
   - `onWrite`: `bool fn(int16_t value)`; return `false` to reply `MEO_ERR_HANDLE_FAILED`. Without one, writes reply `MEO_ERR_OP_NOT_SUPPORTED`.
   - `onRead`: `int16_t fn()`. Without one, a read answers the cap's last value written or sent (0 after boot — call `sendEvent` once online if the cap boots non-zero).
 - Every cap can be read, written and sent as an event; handlers decide which actually do something.
-- All registration happens in `setup()`, before `begin()`. Changing the cap list on a provisioned device requires re-provisioning, since the gateway learns the list only then.
+- All registration happens in `setup()`, before `begin()`. Changing the cap list on a provisioned device requires re-provisioning, since the edge learns the list only then.
 - Values are `int16`. Send decimals scaled x100 (23.45 °C → `2345`).
 - `buildCapabilityPayload(out, cap)` — serializes the declared set into the capability characteristic payload. Called internally by `begin()`; exposed mainly for testing.
 
@@ -42,15 +42,15 @@ This library follows the MEO Edge contract: it gets an ESP32 device provisioned 
 
 ## Provisioning
 
-When Wi-Fi is missing, the device advertises the MEO provisioning BLE service and walks the gateway through MAC → capabilities → Wi-Fi config → status notify. The exact GATT contract (UUIDs, payload formats, status states) is documented once, shared with the gateway, in `meo-edge/docs/firmware_development_guide.md` — treat that file as the source of truth rather than this one.
+When Wi-Fi is missing, the device advertises the MEO provisioning BLE service and walks the edge through MAC → capabilities → Wi-Fi config → status notify. The exact GATT contract (UUIDs, payload formats, status states) is documented once, shared with the edge, in `meo-edge/docs/firmware_development_guide.md` — treat that file as the source of truth rather than this one.
 
 ## Capabilities
 
-There is no shared catalog: the device defines its own caps by key and reports them to the gateway during provisioning as `{"model":..,"fw":..,"caps":["led","temp"]}`. Array position is the cap's idx on the wire.
+There is no shared catalog: the device defines its own caps by key and reports them to the edge during provisioning as `{"model":..,"fw":..,"caps":["led","temp"]}`. Array position is the cap's idx on the wire.
 
 ## Messaging
 
-Once Wi-Fi is up, `MeoDevice` connects to the gateway broker (host/port stored during BLE provisioning, keys `mq_host`/`mq_port`), subscribes to `meo/v1/device/{id}/down`, dispatches each READ/WRITE to the cap's handler, and replies OK/ERR on `meo/v1/device/{id}/up` (events go there too). Every frame is 4 bytes: `type(3b)|seq(5b)`, `idx`, `int16` value little-endian. Reconnects retry every 5 s; `down` is QoS 1, replies and events are QoS 0 (PubSubClient publish limitation).
+Once Wi-Fi is up, `MeoDevice` connects to the edge's broker (host/port stored during BLE provisioning, keys `mq_host`/`mq_port`), subscribes to `meo/v1/device/{id}/down`, dispatches each READ/WRITE to the cap's handler, and replies OK/ERR on `meo/v1/device/{id}/up` (events go there too). Every frame is 4 bytes: `type(3b)|seq(5b)`, `idx`, `int16` value little-endian. Reconnects retry every 5 s; `down` is QoS 1, replies and events are QoS 0 (PubSubClient publish limitation).
 
 ## Identity
 

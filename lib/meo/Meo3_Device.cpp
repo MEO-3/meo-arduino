@@ -94,7 +94,7 @@ bool MeoDevice::begin() {
     }
 
     // 512 B is the BLE attribute max; an oversized report is served empty, so the
-    // gateway provisions the device with no caps.
+    // edge provisions the device with no caps.
     char capPayload[513];
     if (buildCapabilityPayload(capPayload, sizeof(capPayload)) == 0) {
         loge("DEVICE", "Cap report over 512 B; shorten cap keys");

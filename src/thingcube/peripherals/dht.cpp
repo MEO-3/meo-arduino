@@ -8,7 +8,7 @@
 static DHT dht(DHT11_PIN, DHT11);
 
 // The DHT11 drops reads routinely and the MEO reply frame has no "no value"
-// encoding, so a NAN would ship to the gateway as a float32 NaN. Hold the last
+// encoding, so a NAN would ship to the edge as a float32 NaN. Hold the last
 // good sample instead.
 static float lastT = NAN;
 static float lastH = NAN;

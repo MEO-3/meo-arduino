@@ -1,6 +1,6 @@
-// Control the built-in LED from the gateway.
+// Control the built-in LED from the edge.
 //
-// Declares the "led" cap and drives LED_BUILTIN with it. The gateway sends the
+// Declares the "led" cap and drives LED_BUILTIN with it. The edge sends the
 // write over MQTT and waits for this device's reply:
 //
 //   curl -X POST http://<gateway>:7070/api/v1/devices/<deviceId>/command \
@@ -10,7 +10,7 @@
 // deviceId is the device's Wi-Fi MAC, lowercase hex without separators.
 //
 // On first boot the device is unprovisioned and advertises over BLE; provision
-// it from the gateway before sending commands. To skip provisioning while
+// it from the edge before sending commands. To skip provisioning while
 // developing, uncomment the beginWifi()/setBroker() calls below.
 
 #include <Arduino.h>
@@ -21,7 +21,7 @@
 MeoDevice meo("MEO LED Demo");
 
 // "led" write handler. Returning false replies MEO_ERR_HANDLE_FAILED to the
-// gateway; here the write always succeeds.
+// edge; here the write always succeeds.
 static bool handleLed(int16_t value) {
     digitalWrite(LED_BUILTIN, value ? LOW : HIGH);
     Serial.printf("[LED] %s\n", value ? "on" : "off");
@@ -37,7 +37,7 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
 
 
-    // Declare the cap before begin(): the gateway reads the cap list off the
+    // Declare the cap before begin(): the edge reads the cap list off the
     // BLE capability characteristic while provisioning.
     meo.addCap("led", handleLed);
 
