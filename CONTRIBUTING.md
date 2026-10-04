@@ -29,7 +29,7 @@ There's no test suite checked in yet (`test/` is the PlatformIO Unit Testing pla
 
 ## Wire contract
 
-`msg/` mirrors the edge's `MeoMsgEdgeFrame.java`, the device topics in `MeoTopic.java`, and the device codes (1–99) in `MeoErr.java` (in `meo-edge`). `provision/` UUIDs mirror `ProvisionBleUuid.java`. There's no shared build-time check, so change both sides together (separate commits — independent repos).
+`msg/` mirrors the edge's `MeoEdgeMsgFrame.java`, the device topics in `MeoTopic.java`, and the device codes (1–99) in `MeoErr.java` (in `meo-edge`). `provision/` UUIDs mirror `ProvisionBleUuid.java`. There's no shared build-time check, so change both sides together (separate commits — independent repos).
 
 ## Conventions
 

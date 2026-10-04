@@ -2,7 +2,7 @@
 #include "Meo3_MsgErr.h"
 #include <string.h>
 
-// Frame: mirror of the edge's MeoMsgEdgeFrame.java.
+// Frame: mirror of the edge's MeoEdgeMsgFrame.java.
 static const unsigned int FRAME_SIZE = 4;
 static const uint8_t TYPE_READ  = 0;
 static const uint8_t TYPE_WRITE = 1;
