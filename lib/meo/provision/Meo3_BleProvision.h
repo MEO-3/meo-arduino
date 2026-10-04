@@ -1,27 +1,27 @@
 #pragma once
 
+#include "../Meo3_Logger.h"
+#include "../ble/Meo3_Ble.h"
+#include "../storage/Meo3_Storage.h"
 #include <Arduino.h>
 #include <NimBLEDevice.h>
 #include <string>
-#include "../Meo3_Logger.h"
-#include "../storage/Meo3_Storage.h"
-#include "../ble/Meo3_Ble.h"
 
 // MEO Edge provisioning contract; mirrors the edge's ProvisionBleUuid.java.
-#define MEO_BLE_PROV_SERV_UUID      "7f5a0000-0f23-4b6a-9f5e-3c2a9f7e0100"
-#define CH_UUID_DEVICE_MAC          "7f5a0001-0f23-4b6a-9f5e-3c2a9f7e0100"
-#define CH_UUID_NETWORK_CONFIG      "7f5a0002-0f23-4b6a-9f5e-3c2a9f7e0100"
-#define CH_UUID_PROVISION_STATUS    "7f5a0003-0f23-4b6a-9f5e-3c2a9f7e0100"
+#define MEO_BLE_PROV_SERV_UUID "7f5a0000-0f23-4b6a-9f5e-3c2a9f7e0100"
+#define CH_UUID_DEVICE_MAC "7f5a0001-0f23-4b6a-9f5e-3c2a9f7e0100"
+#define CH_UUID_NETWORK_CONFIG "7f5a0002-0f23-4b6a-9f5e-3c2a9f7e0100"
+#define CH_UUID_PROVISION_STATUS "7f5a0003-0f23-4b6a-9f5e-3c2a9f7e0100"
 #define CH_UUID_DEVICE_CAPABILITIES "7f5a0004-0f23-4b6a-9f5e-3c2a9f7e0100"
 
 class MeoBleProvision {
-public:
+  public:
     MeoBleProvision() = default;
-    bool begin(MeoBle* ble, MeoStorage* storage, const char* deviceName);
+    bool begin(MeoBle *ble, MeoStorage *storage, const char *deviceName);
 
     // Set the capability report served over the read-only capability
     // characteristic. Call before begin(). The string is copied.
-    void setCapabilities(const char* payload);
+    void setCapabilities(const char *payload);
 
     // Start/stop advertising through base BLE
     void startAdvertising();
@@ -30,36 +30,36 @@ public:
     // Call regularly to refresh status and handle optional scheduled reboot
     void loop();
 
-    void setProvisionState(const char* state);
+    void setProvisionState(const char *state);
 
-private:
-    MeoBle*            _ble      = nullptr;
-    MeoStorage*        _storage  = nullptr;
+  private:
+    MeoBle *_ble = nullptr;
+    MeoStorage *_storage = nullptr;
 
-    std::string        _deviceName;
-    std::string        _macAddress;
-    std::string        _capabilities;
-    std::string        _pendingSsid;
-    std::string        _pendingPassword;
+    std::string _deviceName;
+    std::string _macAddress;
+    std::string _capabilities;
+    std::string _pendingSsid;
+    std::string _pendingPassword;
 
-    NimBLEService*         _svc      = nullptr;
-    NimBLECharacteristic*  _chMac = nullptr;
-    NimBLECharacteristic*  _chWifiConfig = nullptr;
-    NimBLECharacteristic*  _chStatus = nullptr;
-    NimBLECharacteristic*  _chCapabilities = nullptr;
+    NimBLEService *_svc = nullptr;
+    NimBLECharacteristic *_chMac = nullptr;
+    NimBLECharacteristic *_chWifiConfig = nullptr;
+    NimBLECharacteristic *_chStatus = nullptr;
+    NimBLECharacteristic *_chCapabilities = nullptr;
 
-    char                _statusBuf[96] = {0};
-    bool                _wifiConfigPending = false;
-    bool                _wifiConnectRunning = false;
+    char _statusBuf[96] = {0};
+    bool _wifiConfigPending = false;
+    bool _wifiConnectRunning = false;
     // Internal lifecycle
     bool _createServiceAndCharacteristics();
     void _bindWriteHandlers();
     void _loadInitialValues();
     void _connectPendingWifi();
-    void _setStatusJson(const char* state, const char* message = nullptr);
+    void _setStatusJson(const char *state, const char *message = nullptr);
     std::string _readMacAddress() const;
 
     // Write callbacks
-    static void _onWriteStatic(NimBLECharacteristic* ch, void* ctx);
-    void _onWrite(NimBLECharacteristic* ch);
+    static void _onWriteStatic(NimBLECharacteristic *ch, void *ctx);
+    void _onWrite(NimBLECharacteristic *ch);
 };
