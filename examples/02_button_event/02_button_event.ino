@@ -11,7 +11,7 @@ MeoDevice meo("Classroom Button");
 
 void setup() {
   pinMode(buttonPin, INPUT_PULLUP);
-  meo.addCap("button");
+  meo.addCap("button", MEO_CAP_GENERIC);
   meo.begin();
 }
 

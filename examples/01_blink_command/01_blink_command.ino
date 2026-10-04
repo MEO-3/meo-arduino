@@ -39,7 +39,7 @@ void setup()
 
     // Declare the cap before begin(): the edge reads the cap list off the
     // BLE capability characteristic while provisioning.
-    meo.addCap("led", handleLed);
+    meo.addCap("led", MEO_CAP_SWITCH, handleLed);
 
     // Development shortcut — bypasses BLE provisioning:
     // meo.beginWifi("your-ssid", "your-password");

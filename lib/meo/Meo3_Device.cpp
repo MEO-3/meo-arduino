@@ -1,68 +1,78 @@
 #include "Meo3_Device.h"
-#include <string.h>
-#include <stdarg.h>
 #include <esp_system.h>
+#include <stdarg.h>
+#include <string.h>
 
 MeoDevice::MeoDevice()
-    : _model("MEO Device"),
-      _manufacturer("ThingAI"),
-      _fwVersion("0.0.0"),
-      _wifiSsid(nullptr),
+    : _model("MEO Device"), _manufacturer("ThingEdu"), _fwVersion("0.0.0"), _wifiSsid(nullptr),
       _wifiPass(nullptr) {}
 
-MeoDevice::MeoDevice(const char* model)
-    : _model(model && model[0] ? model : "MEO Device"),
-      _manufacturer("ThingAI"),
-      _fwVersion("0.0.0"),
-      _wifiSsid(nullptr),
-      _wifiPass(nullptr) {}
+MeoDevice::MeoDevice(const char *model)
+    : _model(model && model[0] ? model : "MEO Device"), _manufacturer("ThingEdu"),
+      _fwVersion("0.0.0"), _wifiSsid(nullptr), _wifiPass(nullptr) {}
 
-void MeoDevice::setDeviceInfo(const char* model, const char* manufacturer) {
-    if (model && model[0]) _model = model;
+void MeoDevice::setDeviceInfo(const char *model, const char *manufacturer) {
+    if (model && model[0])
+        _model = model;
     _manufacturer = manufacturer;
 }
 
-void MeoDevice::setFirmwareVersion(const char* version) {
-    if (version && version[0]) _fwVersion = version;
+void MeoDevice::setFirmwareVersion(const char *version) {
+    if (version && version[0])
+        _fwVersion = version;
 }
 
-int MeoDevice::addCap(const char* key, MeoMsg::MeoWriteHandler onWrite,
+int MeoDevice::addCap(const char *key, uint8_t type, MeoMsg::MeoWriteHandler onWrite,
                       MeoMsg::MeoReadHandler onRead) {
-    return _msg.addCap(key, onWrite, onRead);
+    return _msg.addCap(key, type, onWrite, onRead);
 }
 
-size_t MeoDevice::buildCapabilityPayload(char* out, size_t cap) const {
-    if (!out || cap == 0) return 0;
+size_t MeoDevice::buildCapabilityPayload(char *out, size_t cap) const {
+    if (!out || cap == 0)
+        return 0;
 
-    int n = snprintf(out, cap,
-                     "{\"model\":\"%s\",\"fw\":\"%s\",\"caps\":[",
-                     _model ? _model : "",
+    int n = snprintf(out, cap, "{\"model\":\"%s\",\"fw\":\"%s\",\"caps\":[", _model ? _model : "",
                      _fwVersion ? _fwVersion : "");
-    if (n < 0 || (size_t)n >= cap) return 0;
+    if (n < 0 || (size_t)n >= cap)
+        return 0;
     size_t len = (size_t)n;
 
     for (uint8_t i = 0; i < _msg.capCount(); ++i) {
-        int m = snprintf(out + len, cap - len, "%s\"%s\"",
-                         i == 0 ? "" : ",", _msg.capKey(i));
-        if (m < 0 || len + (size_t)m >= cap) return 0;
+        int m = snprintf(out + len, cap - len, "%s\"%s\"", i == 0 ? "" : ",", _msg.capKey(i));
+        if (m < 0 || len + (size_t)m >= cap)
+            return 0;
         len += (size_t)m;
     }
 
-    int t = snprintf(out + len, cap - len, "]}");
-    if (t < 0 || len + (size_t)t >= cap) return 0;
+    // Types run parallel to caps, so an edge that predates them still reads the keys.
+    int t = snprintf(out + len, cap - len, "],\"types\":[");
+    if (t < 0 || len + (size_t)t >= cap)
+        return 0;
+    len += (size_t)t;
+
+    for (uint8_t i = 0; i < _msg.capCount(); ++i) {
+        int m = snprintf(out + len, cap - len, "%s%u", i == 0 ? "" : ",", _msg.capType(i));
+        if (m < 0 || len + (size_t)m >= cap)
+            return 0;
+        len += (size_t)m;
+    }
+
+    t = snprintf(out + len, cap - len, "]}");
+    if (t < 0 || len + (size_t)t >= cap)
+        return 0;
     return len + (size_t)t;
 }
 
-bool MeoDevice::sendEvent(const char* key, int16_t value) {
+bool MeoDevice::sendEvent(const char *key, int16_t value) {
     return _msg.sendEvent(key, value);
 }
 
-void MeoDevice::setBroker(const char* host, uint16_t port) {
+void MeoDevice::setBroker(const char *host, uint16_t port) {
     _brokerHostOverride = host;
     _brokerPortOverride = port;
 }
 
-void MeoDevice::beginWifi(const char* ssid, const char* pass) {
+void MeoDevice::beginWifi(const char *ssid, const char *pass) {
     _wifiSsid = ssid;
     _wifiPass = pass;
     logi("DEVICE", "Connecting WiFi SSID=%s", ssid ? ssid : "");
@@ -158,7 +168,7 @@ void MeoDevice::loop() {
 void MeoDevice::_startMsg() {
     _msgStarted = true;
 
-    const char* host = _brokerHostOverride;
+    const char *host = _brokerHostOverride;
     uint16_t port = _brokerPortOverride;
     if (!host) {
         if (!_storage.loadString("mq_host", _storedBrokerHost) || _storedBrokerHost.empty()) {
@@ -185,10 +195,12 @@ bool MeoDevice::isProvisioned() const {
 }
 
 bool MeoDevice::_tryConnectStoredWifi() {
-    if (_wifiSsid && _wifiPass) return false;  // caller already set credentials via beginWifi()
+    if (_wifiSsid && _wifiPass)
+        return false; // caller already set credentials via beginWifi()
 
     std::string ssid, pass;
-    if (!_storage.loadString("wifi_ssid", ssid) || ssid.empty()) return false;
+    if (!_storage.loadString("wifi_ssid", ssid) || ssid.empty())
+        return false;
     _storage.loadString("wifi_pass", pass);
 
     logi("DEVICE", "Connecting stored WiFi SSID=%s", ssid.c_str());
@@ -208,15 +220,15 @@ bool MeoDevice::_tryConnectStoredWifi() {
 }
 
 void MeoDevice::_ensureMacIdentity() {
-    if (_deviceId.length()) return;
+    if (_deviceId.length())
+        return;
     uint8_t mac[6] = {0};
     if (esp_read_mac(mac, ESP_MAC_WIFI_STA) != ESP_OK) {
         esp_read_mac(mac, ESP_MAC_ETH);
     }
     // Lowercase hex, no separators — used as the device id in MQTT topics
     char buf[13];
-    snprintf(buf, sizeof(buf), "%02x%02x%02x%02x%02x%02x",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    snprintf(buf, sizeof(buf), "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4],
+             mac[5]);
     _deviceId = buf;
 }
-

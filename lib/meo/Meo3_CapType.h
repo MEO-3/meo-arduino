@@ -1,0 +1,11 @@
+#pragma once
+
+#define MEO_CAP_GENERIC 0
+#define MEO_CAP_SWITCH 1
+
+#define MEO_CAP_BRIGHTNESS 2
+#define MEO_CAP_HUE 3
+#define MEO_CAP_SATURATION 4
+
+#define MEO_CAP_TEMPERATURE 5
+#define MEO_CAP_HUMIDITY 6

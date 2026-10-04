@@ -28,8 +28,8 @@ bool setMotor(int16_t speed) { /* ... */ return true; }
 void setup() {
   // Declare caps before begin() — the edge reads them off the BLE
   // capability characteristic during provisioning.
-  meo.addCap("temp", nullptr, readTemp);
-  meo.addCap("motor", setMotor);
+  meo.addCap("temp", MEO_CAP_TEMPERATURE, nullptr, readTemp);
+  meo.addCap("motor", MEO_CAP_GENERIC, setMotor);
 
   meo.begin();
 }
@@ -43,7 +43,7 @@ void loop() {
 
 - `MeoDevice()` / `MeoDevice(model)`
 - `setDeviceInfo(model, manufacturer)`, `setFirmwareVersion(version)`
-- `addCap(key, onWrite, onRead)` — declare a cap by key; call before `begin()`
+- `addCap(key, type, onWrite, onRead)` — declare a cap by key and type (`MEO_CAP_*`); call before `begin()`
 - `sendEvent(key, value)` — push a cap's value (reading or event) to the edge
 - `beginWifi(ssid, pass)` — bypass BLE provisioning for local development
 - `begin()` — init storage/BLE/provisioning, connect if already provisioned
@@ -58,7 +58,7 @@ The device advertises the MEO provisioning service when Wi-Fi is missing. The fu
 
 ## Capabilities
 
-A device defines its own caps by key (`[a-z0-9_]{1,32}`, max 16) and reports them during provisioning; there is no shared catalog. Every cap can be read, written and sent as an event, with `int16` values (decimals x100). Changing the cap list requires re-provisioning.
+A device defines its own caps by key (`[a-z0-9_]{1,32}`, max 16), gives each a type (`MEO_CAP_*`, `MEO_CAP_GENERIC` when none fits) and reports them during provisioning. Every cap can be read, written and sent as an event, with `int16` values (decimals x100). Changing the cap list requires re-provisioning.
 
 ## Examples
 

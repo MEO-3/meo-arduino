@@ -5,7 +5,7 @@ This library follows the MEO Edge contract: it gets an ESP32 device provisioned 
 ## Device lifecycle
 
 - `MeoDevice(model)` creates one device instance
-- Declare caps with `addCap(key, onWrite, onRead)` in `setup()`, before `begin()`
+- Declare caps with `addCap(key, type, onWrite, onRead)` in `setup()`, before `begin()`
 - `begin()` starts storage, BLE, and provisioning; connects to Wi-Fi if credentials are already stored
 - `loop()` drives provisioning, detects when Wi-Fi comes up, then runs MQTT messaging (broker host/port come from storage, written during BLE provisioning)
 - `isProvisioned()` / `isWifiConnected()` / `isMqttConnected()` report status
@@ -20,7 +20,8 @@ This library follows the MEO Edge contract: it gets an ESP32 device provisioned 
 
 ### Capabilities & handlers
 
-- `addCap(key, onWrite = nullptr, onRead = nullptr)` → idx, or -1 if rejected. The key is yours to pick: `[a-z0-9_]{1,32}`, unique, at most 16 caps, and the whole report must fit 512 bytes. A cap's idx (its wire id) is its declaration order.
+- `addCap(key, type, onWrite = nullptr, onRead = nullptr)` → idx, or -1 if rejected. The key is yours to pick: `[a-z0-9_]{1,32}`, unique, at most 16 caps, and the whole report must fit 512 bytes. A cap's idx (its wire id) is its declaration order.
+  - `type`: what the cap is, one of `MEO_CAP_*` in `Meo3_CapType.h` (`MEO_CAP_SWITCH`, `MEO_CAP_TEMPERATURE`, ...). Use `MEO_CAP_GENERIC` when none fits.
   - `onWrite`: `bool fn(int16_t value)`; return `false` to reply `MEO_ERR_HANDLE_FAILED`. Without one, writes reply `MEO_ERR_OP_NOT_SUPPORTED`.
   - `onRead`: `int16_t fn()`. Without one, a read answers the cap's last value written or sent (0 after boot — call `sendEvent` once online if the cap boots non-zero).
 - Every cap can be read, written and sent as an event; handlers decide which actually do something.
@@ -46,7 +47,7 @@ When Wi-Fi is missing, the device advertises the MEO provisioning BLE service an
 
 ## Capabilities
 
-There is no shared catalog: the device defines its own caps by key and reports them to the edge during provisioning as `{"model":..,"fw":..,"caps":["led","temp"]}`. Array position is the cap's idx on the wire.
+The device names its own caps by key and gives each a type from the shared list in `Meo3_CapType.h` (mirror of the edge's `MeoDevCapabilityType.java`). It reports them to the edge during provisioning as `{"model":..,"fw":..,"caps":["led","temp"],"types":[1,5]}`. Array position is the cap's idx on the wire; `types` runs parallel to `caps`.
 
 ## Messaging
 

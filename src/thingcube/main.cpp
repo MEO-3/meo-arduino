@@ -27,8 +27,8 @@ void setup() {
 
     // Must happen before begin(): the BLE capability characteristic is built
     // from the declared set.
-    meo.addCap("temp", nullptr, readTemp);
-    meo.addCap("humid", nullptr, readHumid);
+    meo.addCap("temp", MEO_CAP_TEMPERATURE, nullptr, readTemp);
+    meo.addCap("humid", MEO_CAP_HUMIDITY, nullptr, readHumid);
 
     // One shared bus for the MPU6050 and the OLED.
     Wire.begin(SDA_PIN, SCL_PIN);

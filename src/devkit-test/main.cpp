@@ -43,8 +43,8 @@ void setup() {
 
     // Caps declared before begin() — the edge reads them off the BLE
     // capability characteristic during provisioning. idx = declaration order.
-    meo.addCap("led", handleLed);
-    meo.addCap("temp", nullptr, readTemperature);
+    meo.addCap("led", MEO_CAP_SWITCH, handleLed);
+    meo.addCap("temp", MEO_CAP_TEMPERATURE, nullptr, readTemperature);
 
     bool ok = meo.begin();
     if (!ok) {

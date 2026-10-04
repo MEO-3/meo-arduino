@@ -12,7 +12,7 @@ static int16_t readTemperature() {
 }
 
 void setup() {
-  meo.addCap("temperature", nullptr, readTemperature);
+  meo.addCap("temperature", MEO_CAP_TEMPERATURE, nullptr, readTemperature);
   meo.begin();
 }
 
