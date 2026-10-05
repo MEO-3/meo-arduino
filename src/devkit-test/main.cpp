@@ -1,14 +1,17 @@
 #include <Arduino.h>
-#include <WiFi.h>
+#include <DHT.h>
 #include <Meo3.h>
+#include <WiFi.h>
 
 // ESP32-C3-DevKitC-02 built-in RGB is GPIO8; adjust if your board differs
 #define LED_PIN 8
+#define DHT11_PIN 3
 
-// How often to publish the periodic temperature reading (ms)
-#define READING_INTERVAL_MS 10000
+// How often to sample temperature + humidity (ms); the DHT11 refreshes every ~2s
+#define READING_INTERVAL_MS 2000
 
 MeoDevice meo("MEO Test Device");
+static DHT dht(DHT11_PIN, DHT11);
 
 // Blink LED n times at the given on/off period (ms)
 static void blinkLed(int times, int periodMs) {
@@ -22,29 +25,46 @@ static void blinkLed(int times, int periodMs) {
 
 // "led" write handler: 0 = off, anything else = on
 static bool handleLed(int16_t value) {
-    digitalWrite(LED_PIN, value ? HIGH : LOW);
+    digitalWrite(LED_PIN, value ? LOW : HIGH);
     return true;
 }
 
-// "temp" read handler, °C x100: no real sensor on the devkit — fake a slow drift
+// "temp" read handler, °C x100. The DHT11 drops reads routinely and the reply
+// frame has no "no value" encoding, so hold the last good sample.
 static int16_t readTemperature() {
-    return 2000 + (millis() % 10000) / 10;
+    static int16_t last = 0;
+    float v = dht.readTemperature();
+    if (!isnan(v)) {
+        last = (int16_t)lroundf(v * 100);
+    }
+    return last;
+}
+
+// "humid" read handler, %RH x100; same last-good hold as temp
+static int16_t readHumidity() {
+    static int16_t last = 0;
+    float v = dht.readHumidity();
+    if (!isnan(v)) {
+        last = (int16_t)lroundf(v * 100);
+    }
+    return last;
 }
 
 void setup() {
     Serial.begin(115200);
-    delay(500);  // let USB CDC enumerate before first print
+    delay(500); // let USB CDC enumerate before first print
 
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);
+    dht.begin();
 
     Serial.println("\n=== MEO Provisioning + Messaging Test ===");
-
 
     // Caps declared before begin() — the edge reads them off the BLE
     // capability characteristic during provisioning. idx = declaration order.
     meo.addCap("led", MEO_CAP_SWITCH, handleLed);
     meo.addCap("temp", MEO_CAP_TEMPERATURE, nullptr, readTemperature);
+    meo.addCap("humid", MEO_CAP_HUMIDITY, nullptr, readHumidity);
 
     bool ok = meo.begin();
     if (!ok) {
@@ -81,10 +101,19 @@ void loop() {
         blinkLed(5, 150);
     }
 
-    // Periodic reading once messaging is online
+    // Sample once messaging is online and push only values that moved. A push
+    // that fails leaves the marker alone, so it retries next tick.
     static uint32_t lastReadingAt = 0;
+    static int16_t pushedT = INT16_MIN, pushedH = INT16_MIN;
     if (meo.isMqttConnected() && millis() - lastReadingAt >= READING_INTERVAL_MS) {
         lastReadingAt = millis();
-        meo.sendEvent("temp", readTemperature());
+        int16_t t = readTemperature();
+        int16_t h = readHumidity();
+        if (t != pushedT && meo.sendEvent("temp", t)) {
+            pushedT = t;
+        }
+        if (h != pushedH && meo.sendEvent("humid", h)) {
+            pushedH = h;
+        }
     }
 }
